@@ -1,12 +1,8 @@
 import { useState, useEffect } from 'react'
+import MonthYearPicker from '../components/MonthYearPicker'
+import { fmt } from '../utils/formatting'
 
 const currentDate = new Date()
-
-const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-
-function fmt(value) {
-  return Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-}
 
 function DashboardPage() {
   const [report, setReport] = useState(null)
@@ -39,18 +35,7 @@ function DashboardPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem' }}>
         <h2 style={{ margin: 0 }}>Dashboard</h2>
         <div className="filters" style={{ margin: 0 }}>
-          <select value={month} onChange={(e) => setMonth(e.target.value)}>
-            {MONTHS.map((m, i) => (
-              <option key={i + 1} value={i + 1}>{m}</option>
-            ))}
-          </select>
-          <input
-            type="number"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            min="2000"
-            style={{ width: 80 }}
-          />
+          <MonthYearPicker month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} />
         </div>
       </div>
 

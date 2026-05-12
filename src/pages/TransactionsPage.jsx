@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { categoryColor } from '../utils/categoryColors'
+import MonthYearPicker from '../components/MonthYearPicker'
+import { fmt } from '../utils/formatting'
 
 const currentDate = new Date()
-
-const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
@@ -20,10 +20,6 @@ const emptyForm = {
   category_id: '',
 }
 
-
-function fmt(value) {
-  return Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-}
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([])
@@ -130,18 +126,7 @@ function TransactionsPage() {
       <h2>Transações</h2>
 
       <div className="filters">
-        <select value={month} onChange={(e) => setMonth(e.target.value)}>
-          {MONTHS.map((m, i) => (
-            <option key={i + 1} value={i + 1}>{m}</option>
-          ))}
-        </select>
-        <input
-          type="number"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          min="2000"
-          style={{ width: 80 }}
-        />
+        <MonthYearPicker month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} />
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="">Todos</option>
           <option value="expense">Despesas</option>
