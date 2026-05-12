@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import MonthYearPicker from '../components/MonthYearPicker'
+import SummaryCard from '../components/SummaryCard'
 import { fmt } from '../utils/formatting'
 import { useApi } from '../hooks/useApi'
 
@@ -44,28 +45,13 @@ function DashboardPage() {
             <div className="section">
               <h3>Resumo</h3>
               <div className="summary-grid">
-                <div className="summary-card">
-                  <h3>Receitas</h3>
-                  <div className="value income">R$ {fmt(report.summary.income_total)}</div>
-                </div>
-                <div className="summary-card">
-                  <h3>Despesas</h3>
-                  <div className="value expense">R$ {fmt(report.summary.expenses_total)}</div>
-                </div>
-                <div className="summary-card">
-                  <h3>Diferença</h3>
-                  <div className="value">R$ {fmt(report.summary.difference)}</div>
-                </div>
+                <SummaryCard title="Receitas" value={report.summary.income_total} variant="income" />
+                <SummaryCard title="Despesas" value={report.summary.expenses_total} variant="expense" />
+                <SummaryCard title="Diferença" value={report.summary.difference} />
               </div>
               <div className="summary-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <div className="summary-card">
-                  <h3>Cartão de Crédito</h3>
-                  <div className="value">R$ {fmt(report.credit_card_total)}</div>
-                </div>
-                <div className="summary-card">
-                  <h3>Saldo Atual</h3>
-                  <div className="value">R$ {fmt(report.current_balance)}</div>
-                </div>
+                <SummaryCard title="Cartão de Crédito" value={report.credit_card_total} />
+                <SummaryCard title="Saldo Atual" value={report.current_balance} />
               </div>
             </div>
 
@@ -87,14 +73,8 @@ function DashboardPage() {
             )}
 
             <div className="summary-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-              <div className="summary-card">
-                <h3>A Receber</h3>
-                <div className="value income">R$ {fmt(report.provisions.to_receive.total)}</div>
-              </div>
-              <div className="summary-card">
-                <h3>A Pagar</h3>
-                <div className="value expense">R$ {fmt(report.provisions.to_pay.total)}</div>
-              </div>
+              <SummaryCard title="A Receber" value={report.provisions.to_receive.total} variant="income" />
+              <SummaryCard title="A Pagar" value={report.provisions.to_pay.total} variant="expense" />
             </div>
           </>
       }
