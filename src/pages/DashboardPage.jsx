@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import MonthYearPicker from '../components/MonthYearPicker'
 import { fmt } from '../utils/formatting'
+import { useApi } from '../hooks/useApi'
 
 const currentDate = new Date()
 
@@ -10,7 +11,7 @@ function DashboardPage() {
   const [month, setMonth] = useState(currentDate.getMonth() + 1)
   const [year, setYear] = useState(currentDate.getFullYear())
 
-  const token = localStorage.getItem('token')
+  const apiFetch = useApi()
 
   useEffect(() => {
     fetchReport()
@@ -20,9 +21,7 @@ function DashboardPage() {
     setLoading(true)
     const query = new URLSearchParams({ month, year }).toString()
 
-    fetch(`http://localhost:8000/reports/monthly?${query}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch(`/reports/monthly?${query}`)
       .then((res) => res.json())
       .then((data) => {
         setReport(data)

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { categoryColor } from '../utils/categoryColors'
+import { useApi } from '../hooks/useApi'
 
 function KeywordInputs({ list, setList }) {
   function update(index, value) {
@@ -49,7 +50,7 @@ function CategoriesPage() {
   const [editingName, setEditingName] = useState('')
   const [editingKeywords, setEditingKeywords] = useState([''])
 
-  const token = localStorage.getItem('token')
+  const apiFetch = useApi()
 
   useEffect(() => {
     fetchCategories()
@@ -57,9 +58,7 @@ function CategoriesPage() {
 
   function fetchCategories() {
     setLoading(true)
-    fetch('http://localhost:8000/categories', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch('/categories')
       .then((res) => res.json())
       .then((data) => {
         setCategories(data)
@@ -70,9 +69,9 @@ function CategoriesPage() {
   async function handleCreate(e) {
     e.preventDefault()
     const pattern = keywords.filter((k) => k.trim()).join(';')
-    await fetch('http://localhost:8000/categories', {
+    await apiFetch('/categories', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, pattern: pattern || null }),
     })
     setName('')
@@ -81,18 +80,15 @@ function CategoriesPage() {
   }
 
   async function handleDelete(id) {
-    await fetch(`http://localhost:8000/categories/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    await apiFetch(`/categories/${id}`, { method: 'DELETE' })
     fetchCategories()
   }
 
   async function handleEdit(id) {
     const pattern = editingKeywords.filter((k) => k.trim()).join(';')
-    await fetch(`http://localhost:8000/categories/${id}`, {
+    await apiFetch(`/categories/${id}`, {
       method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: editingName, pattern: pattern || null }),
     })
     setEditingId(null)

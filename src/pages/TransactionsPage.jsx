@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { categoryColor } from '../utils/categoryColors'
 import MonthYearPicker from '../components/MonthYearPicker'
 import { fmt } from '../utils/formatting'
+import { useApi } from '../hooks/useApi'
 
 const currentDate = new Date()
 
@@ -31,12 +32,10 @@ function TransactionsPage() {
   const [form, setForm] = useState(emptyForm)
   const [csvFile, setCsvFile] = useState(null)
 
-  const token = localStorage.getItem('token')
+  const apiFetch = useApi()
 
   useEffect(() => {
-    fetch('http://localhost:8000/categories', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch('/categories')
       .then((res) => res.json())
       .then((data) => {
         const map = {}
@@ -55,9 +54,7 @@ function TransactionsPage() {
     if (type) params.type = type
     const query = new URLSearchParams(params).toString()
 
-    fetch(`http://localhost:8000/transactions?${query}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch(`/transactions?${query}`)
       .then((res) => res.json())
       .then((data) => {
         setTransactions(data)
@@ -90,9 +87,9 @@ function TransactionsPage() {
       payment_method: form.payment_method || null,
     }
 
-    await fetch('http://localhost:8000/transactions', {
+    await apiFetch('/transactions', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
 
@@ -106,13 +103,9 @@ function TransactionsPage() {
     const formData = new FormData()
     formData.append('file', csvFile)
 
-    const result = await fetch(
-      'http://localhost:8000/transactions/import/csv?transaction_type=expense&status=done',
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      }
+    const result = await apiFetch(
+      '/transactions/import/csv?transaction_type=expense&status=done',
+      { method: 'POST', body: formData }
     )
 
     const data = await result.json()
