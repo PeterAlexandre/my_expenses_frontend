@@ -61,7 +61,7 @@ function DashboardPage() {
                 <div className="card">
                   {report.by_category.map((cat) => (
                     <div key={cat.name} className="cat-bar-row">
-                      <span className="cat-bar-label">{cat.name}</span>
+                      <span className="cat-bar-label">{cat.name === 'Uncategorized' ? 'Sem categoria' : cat.name}</span>
                       <div className="cat-bar-track">
                         <div className="cat-bar-fill" style={{ width: `${cat.percentage}%` }} />
                       </div>
