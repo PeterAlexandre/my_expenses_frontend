@@ -237,6 +237,43 @@ button {
 .cat-pattern { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
 .edit-row { display: flex; gap: 0.5rem; flex: 1; align-items: center; }
 
+/* keyword tags (listing) */
+.keyword-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; flex: 1; }
+.keyword-tag {
+  font-size: 0.72rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* keyword inputs (form) */
+.keyword-inputs { display: flex; flex-direction: column; gap: 0.4rem; flex: 1.5; }
+.keyword-input-row { display: flex; gap: 0.4rem; align-items: center; }
+.keyword-input-row input { flex: 1; }
+.btn-icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+}
+.btn-icon:hover { border-color: var(--danger); color: var(--danger); }
+
+/* edit panel (expanded edit inside list-item) */
+.list-item--editing { align-items: flex-start; }
+.edit-panel { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+.edit-panel-actions { display: flex; gap: 0.5rem; }
+
 /* by-category bars */
 .cat-bar-row {
   display: flex;
