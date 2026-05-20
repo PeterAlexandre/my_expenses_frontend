@@ -1,5 +1,17 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import {
+  Center,
+  Paper,
+  Stack,
+  Title,
+  TextInput,
+  PasswordInput,
+  Button,
+  Anchor,
+  Text,
+  Alert,
+} from '@mantine/core'
 
 function RegisterPage() {
   const [name, setName] = useState('')
@@ -26,45 +38,42 @@ function RegisterPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h2>Criar conta</h2>
+    <Center mih="calc(100vh - 57px)" p="md">
+      <Paper withBorder shadow="sm" radius="md" p="xl" w="100%" maw={400}>
+        <Title order={2} mb="lg">Criar conta</Title>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <input
-              type="text"
+          <Stack gap="sm">
+            <TextInput
               placeholder="Nome"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
-          </div>
-          <div className="form-group">
-            <input
+            <TextInput
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </div>
-          <div className="form-group">
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </div>
-          {error && <p className="error-msg">{error}</p>}
-          <button type="submit" className="btn-primary">Cadastrar</button>
+            {error && <Alert color="red" variant="light" p="xs">{error}</Alert>}
+            <Button type="submit" fullWidth mt="xs">Cadastrar</Button>
+          </Stack>
         </form>
-        <p className="auth-footer">
-          Já tem conta? <Link to="/login">Entrar</Link>
-        </p>
-      </div>
-    </div>
+        <Text ta="center" size="sm" c="dimmed" mt="lg">
+          Já tem conta?{' '}
+          <Anchor component={Link} to="/login" c="forest.6" fw={500}>
+            Entrar
+          </Anchor>
+        </Text>
+      </Paper>
+    </Center>
   )
 }
 

@@ -1,4 +1,21 @@
 import { useState, useEffect } from 'react'
+import {
+  Container,
+  Title,
+  Group,
+  Stack,
+  Paper,
+  TextInput,
+  NumberInput,
+  Select,
+  Checkbox,
+  Button,
+  FileButton,
+  Badge,
+  Text,
+  Divider,
+} from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { categoryColor } from '../utils/categoryColors'
 import MonthYearPicker from '../components/MonthYearPicker'
 import { fmt } from '../utils/formatting'
@@ -21,6 +38,24 @@ const emptyForm = {
   category_id: '',
 }
 
+const TYPE_OPTIONS = [
+  { value: 'expense', label: '↓ Despesa' },
+  { value: 'income', label: '↑ Receita' },
+]
+const STATUS_OPTIONS = [
+  { value: 'done', label: 'Realizado' },
+  { value: 'provision', label: 'Provisão' },
+]
+const PAYMENT_OPTIONS = [
+  { value: '', label: 'Sem método' },
+  { value: 'credit_card', label: 'Cartão de crédito' },
+  { value: 'account', label: 'Conta' },
+]
+const FILTER_TYPE_OPTIONS = [
+  { value: '', label: 'Todos' },
+  { value: 'expense', label: 'Despesas' },
+  { value: 'income', label: 'Receitas' },
+]
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([])
@@ -62,20 +97,15 @@ function TransactionsPage() {
       })
   }
 
-  function handleFormChange(e) {
-    const { name, value, type: inputType, checked } = e.target
+  function updateForm(field, value) {
     setForm((prev) => {
-      const updated = {
-        ...prev,
-        [name]: inputType === 'checkbox' ? checked : value,
-      }
-      if (name === 'transaction_type' && value === 'income') {
+      const updated = { ...prev, [field]: value }
+      if (field === 'transaction_type' && value === 'income') {
         updated.payment_method = 'account'
       }
       return updated
     })
   }
-
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -93,11 +123,11 @@ function TransactionsPage() {
       body: JSON.stringify(body),
     })
 
+    setForm(emptyForm)
     fetchTransactions()
   }
 
-  async function handleImport(e) {
-    e.preventDefault()
+  async function handleImport() {
     if (!csvFile) return
 
     const formData = new FormData()
@@ -115,95 +145,149 @@ function TransactionsPage() {
   }
 
   return (
-    <div className="page">
-      <h2>Transações</h2>
+    <Container size="md" py="xl">
+      <Title order={2} mb="xl">Transações</Title>
 
-      <div className="filters">
+      <Group gap="sm" mb="xl" wrap="wrap">
         <MonthYearPicker month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} />
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="">Todos</option>
-          <option value="expense">Despesas</option>
-          <option value="income">Receitas</option>
-        </select>
-        <div className="actions">
-          <label className="btn-ghost" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.55rem 1.1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            <input
-              type="file"
-              accept=".csv"
-              style={{ display: 'none' }}
-              onChange={(e) => { setCsvFile(e.target.files[0]); }}
-            />
-            {csvFile ? csvFile.name : 'CSV'}
-          </label>
-          {csvFile && (
-            <button className="btn-primary" onClick={handleImport}>Importar</button>
-          )}
-        </div>
-      </div>
+        <Select
+          value={type}
+          onChange={(value) => setType(value ?? '')}
+          data={FILTER_TYPE_OPTIONS}
+          allowDeselect={false}
+          w={140}
+        />
+        <Group gap="xs" ml="auto">
+          <FileButton onChange={setCsvFile} accept=".csv">
+            {(props) => (
+              <Button variant="default" {...props}>
+                {csvFile ? csvFile.name : 'CSV'}
+              </Button>
+            )}
+          </FileButton>
+          {csvFile && <Button onClick={handleImport}>Importar</Button>}
+        </Group>
+      </Group>
 
-      <div className="panel">
+      <Paper withBorder radius="md" p="md" mb="lg" shadow="xs">
         <form onSubmit={handleCreate}>
-          <div className="form-row cols-3">
-            <input name="description" placeholder="Descrição" value={form.description} onChange={handleFormChange} required />
-            <input name="amount" type="number" step="0.01" placeholder="Valor" value={form.amount} onChange={handleFormChange} required />
-            <input name="transaction_date" type="date" value={form.transaction_date} onChange={handleFormChange} required />
-          </div>
-          <div className="form-row cols-3">
-            <select name="transaction_type" value={form.transaction_type} onChange={handleFormChange}>
-              <option value="expense">↓ Despesa</option>
-              <option value="income">↑ Receita</option>
-            </select>
-            <select name="status" value={form.status} onChange={handleFormChange}>
-              <option value="done">Realizado</option>
-              <option value="provision">Provisão</option>
-            </select>
-            <select name="payment_method" value={form.payment_method} onChange={handleFormChange}>
-              <option value="">Sem método</option>
-              <option value="credit_card">Cartão de crédito</option>
-              <option value="account">Conta</option>
-            </select>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <label className="field-check">
-              <input name="is_recurring" type="checkbox" checked={form.is_recurring} onChange={handleFormChange} />
-              Recorrente
-            </label>
-            <button type="submit" className="btn-primary">Salvar</button>
-          </div>
+          <Stack gap="sm">
+            <SimpleRow>
+              <TextInput
+                placeholder="Descrição"
+                value={form.description}
+                onChange={(e) => updateForm('description', e.target.value)}
+                required
+                style={{ flex: 1 }}
+              />
+              <NumberInput
+                placeholder="Valor"
+                value={form.amount}
+                onChange={(value) => updateForm('amount', value)}
+                decimalScale={2}
+                fixedDecimalScale
+                hideControls
+                required
+                style={{ flex: 1 }}
+              />
+              <DateInput
+                value={form.transaction_date}
+                onChange={(value) => updateForm('transaction_date', value)}
+                valueFormat="DD/MM/YYYY"
+                required
+                style={{ flex: 1 }}
+              />
+            </SimpleRow>
+            <SimpleRow>
+              <Select
+                value={form.transaction_type}
+                onChange={(value) => updateForm('transaction_type', value)}
+                data={TYPE_OPTIONS}
+                allowDeselect={false}
+                style={{ flex: 1 }}
+              />
+              <Select
+                value={form.status}
+                onChange={(value) => updateForm('status', value)}
+                data={STATUS_OPTIONS}
+                allowDeselect={false}
+                style={{ flex: 1 }}
+              />
+              <Select
+                value={form.payment_method}
+                onChange={(value) => updateForm('payment_method', value ?? '')}
+                data={PAYMENT_OPTIONS}
+                allowDeselect={false}
+                style={{ flex: 1 }}
+              />
+            </SimpleRow>
+            <Group justify="space-between">
+              <Checkbox
+                label="Recorrente"
+                checked={form.is_recurring}
+                onChange={(e) => updateForm('is_recurring', e.currentTarget.checked)}
+              />
+              <Button type="submit">Salvar</Button>
+            </Group>
+          </Stack>
         </form>
-      </div>
+      </Paper>
 
-      {loading
-        ? <p className="muted">Carregando...</p>
-        : transactions.length === 0
-          ? <p className="muted">Nenhuma transação encontrada.</p>
-          : <div className="list">
-              {transactions.map((t) => (
-                <div key={t.transaction_id} className="list-item">
-                  <span className="tx-date">{t.transaction_date}</span>
-                  <span className="tx-desc">
-                    {t.description}
-                    {(t.payment_method || t.status === 'pending') && (
-                      <div className="tx-meta">
-                        {t.payment_method === 'credit_card' && `Cartão ${t.creditcard ? `•••• ${t.creditcard}` : ''}`}
-                        {t.payment_method === 'account' && 'Conta'}
-                        {t.status === 'provision' && ' · provisão'}
-                      </div>
-                    )}
-                  </span>
-                  {t.category_id && (
-                    <span className="tx-badge" style={categoryColor(t.category_id)}>
-                      {categories[t.category_id] ?? '—'}
-                    </span>
+      {loading ? (
+        <Text c="dimmed">Carregando...</Text>
+      ) : transactions.length === 0 ? (
+        <Text c="dimmed">Nenhuma transação encontrada.</Text>
+      ) : (
+        <Paper withBorder radius="md" shadow="xs">
+          {transactions.map((t, i) => (
+            <div key={t.transaction_id}>
+              {i > 0 && <Divider />}
+              <Group p="sm" gap="md" wrap="nowrap">
+                <Text size="xs" c="dimmed" miw={75}>
+                  {t.transaction_date}
+                </Text>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="sm">{t.description}</Text>
+                  {(t.payment_method || t.status === 'provision') && (
+                    <Text size="xs" c="dimmed">
+                      {t.payment_method === 'credit_card' && `Cartão ${t.creditcard ? `•••• ${t.creditcard}` : ''}`}
+                      {t.payment_method === 'account' && 'Conta'}
+                      {t.status === 'provision' && ' · provisão'}
+                    </Text>
                   )}
-                  <span className={`tx-amount ${t.transaction_type === 'income' ? 'income' : 'expense'}`}>
-                    {t.transaction_type === 'income' ? '↑' : '↓'} R$ {fmt(t.amount)}
-                  </span>
                 </div>
-              ))}
+                {t.category_id && (
+                  <Badge
+                    variant="light"
+                    radius="sm"
+                    style={categoryColor(t.category_id)}
+                  >
+                    {categories[t.category_id] ?? '—'}
+                  </Badge>
+                )}
+                <Text
+                  size="sm"
+                  fw={600}
+                  miw={110}
+                  ta="right"
+                  c={t.transaction_type === 'income' ? 'teal.7' : 'red.7'}
+                >
+                  {t.transaction_type === 'income' ? '↑' : '↓'} R$ {fmt(t.amount)}
+                </Text>
+              </Group>
             </div>
-      }
-    </div>
+          ))}
+        </Paper>
+      )}
+    </Container>
+  )
+}
+
+function SimpleRow({ children }) {
+  return (
+    <Group gap="sm" grow align="flex-start">
+      {children}
+    </Group>
   )
 }
 

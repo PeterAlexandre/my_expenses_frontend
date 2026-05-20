@@ -1,5 +1,17 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import {
+  Center,
+  Paper,
+  Stack,
+  Title,
+  TextInput,
+  PasswordInput,
+  Button,
+  Anchor,
+  Text,
+  Alert,
+} from '@mantine/core'
 
 function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,36 +41,36 @@ function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h2>Entrar</h2>
+    <Center mih="calc(100vh - 57px)" p="md">
+      <Paper withBorder shadow="sm" radius="md" p="xl" w="100%" maw={400}>
+        <Title order={2} mb="lg">Entrar</Title>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <input
+          <Stack gap="sm">
+            <TextInput
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </div>
-          <div className="form-group">
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </div>
-          {error && <p className="error-msg">{error}</p>}
-          <button type="submit" className="btn-primary">Entrar</button>
+            {error && <Alert color="red" variant="light" p="xs">{error}</Alert>}
+            <Button type="submit" fullWidth mt="xs">Entrar</Button>
+          </Stack>
         </form>
-        <p className="auth-footer">
-          Não tem conta? <Link to="/register">Cadastre-se</Link>
-        </p>
-      </div>
-    </div>
+        <Text ta="center" size="sm" c="dimmed" mt="lg">
+          Não tem conta?{' '}
+          <Anchor component={Link} to="/register" c="forest.6" fw={500}>
+            Cadastre-se
+          </Anchor>
+        </Text>
+      </Paper>
+    </Center>
   )
 }
 
