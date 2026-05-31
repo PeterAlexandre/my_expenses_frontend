@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { categoryColor } from '../utils/categoryColors'
+import MonthYearPicker from '../components/MonthYearPicker'
+import { fmt } from '../utils/formatting'
+import { useApi } from '../hooks/useApi'
 
 const currentDate = new Date()
-
-const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
@@ -21,10 +22,6 @@ const emptyForm = {
 }
 
 
-function fmt(value) {
-  return Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-}
-
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([])
   const [categories, setCategories] = useState({})
@@ -35,12 +32,10 @@ function TransactionsPage() {
   const [form, setForm] = useState(emptyForm)
   const [csvFile, setCsvFile] = useState(null)
 
-  const token = localStorage.getItem('token')
+  const apiFetch = useApi()
 
   useEffect(() => {
-    fetch('http://localhost:8000/categories', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch('/categories')
       .then((res) => res.json())
       .then((data) => {
         const map = {}
@@ -59,9 +54,7 @@ function TransactionsPage() {
     if (type) params.type = type
     const query = new URLSearchParams(params).toString()
 
-    fetch(`http://localhost:8000/transactions?${query}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch(`/transactions?${query}`)
       .then((res) => res.json())
       .then((data) => {
         setTransactions(data)
@@ -94,9 +87,9 @@ function TransactionsPage() {
       payment_method: form.payment_method || null,
     }
 
-    await fetch('http://localhost:8000/transactions', {
+    await apiFetch('/transactions', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
 
@@ -110,13 +103,9 @@ function TransactionsPage() {
     const formData = new FormData()
     formData.append('file', csvFile)
 
-    const result = await fetch(
-      'http://localhost:8000/transactions/import/csv?transaction_type=expense&status=done',
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      }
+    const result = await apiFetch(
+      '/transactions/import/csv?transaction_type=expense&status=done',
+      { method: 'POST', body: formData }
     )
 
     const data = await result.json()
@@ -130,18 +119,7 @@ function TransactionsPage() {
       <h2>Transações</h2>
 
       <div className="filters">
-        <select value={month} onChange={(e) => setMonth(e.target.value)}>
-          {MONTHS.map((m, i) => (
-            <option key={i + 1} value={i + 1}>{m}</option>
-          ))}
-        </select>
-        <input
-          type="number"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          min="2000"
-          style={{ width: 80 }}
-        />
+        <MonthYearPicker month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} />
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="">Todos</option>
           <option value="expense">Despesas</option>
