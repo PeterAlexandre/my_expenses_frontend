@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import PrivateRoute from './components/PrivateRoute'
 import LoginPage from './pages/LoginPage'
@@ -7,10 +7,13 @@ import DashboardPage from './pages/DashboardPage'
 import TransactionsPage from './pages/TransactionsPage'
 import CategoriesPage from './pages/CategoriesPage'
 
-function App() {
+function Layout() {
+  const location = useLocation()
+  const hideHeader = ['/login', '/register'].includes(location.pathname)
+
   return (
-    <BrowserRouter>
-      <Header title="My Expenses" />
+    <>
+      {!hideHeader && <Header title="My Expenses" />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -18,6 +21,14 @@ function App() {
         <Route path="/transactions" element={<PrivateRoute><TransactionsPage /></PrivateRoute>} />
         <Route path="/categories" element={<PrivateRoute><CategoriesPage /></PrivateRoute>} />
       </Routes>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Layout />
     </BrowserRouter>
   )
 }

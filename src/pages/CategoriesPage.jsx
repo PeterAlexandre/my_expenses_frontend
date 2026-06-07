@@ -1,4 +1,22 @@
 import { useState, useEffect } from 'react'
+import {
+  Container,
+  Title,
+  Group,
+  Stack,
+  Paper,
+  Box,
+  Center,
+  Loader,
+  Modal,
+  TextInput,
+  Button,
+  ActionIcon,
+  Badge,
+  Text,
+  Divider,
+} from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import { categoryColor } from '../utils/categoryColors'
 import { useApi } from '../hooks/useApi'
 
@@ -15,29 +33,29 @@ function KeywordInputs({ list, setList }) {
   }
 
   return (
-    <div className="keyword-inputs">
+    <Stack gap={6} style={{ flex: 1.5 }}>
       {list.map((kw, i) => (
-        <div key={i} className="keyword-input-row">
-          <input
-            type="text"
+        <Group key={i} gap={6} wrap="nowrap">
+          <TextInput
             placeholder="Palavra-chave"
             value={kw}
             onChange={(e) => update(i, e.target.value)}
+            style={{ flex: 1 }}
           />
-          <button
-            type="button"
-            className="btn-ghost btn-icon"
+          <ActionIcon
+            variant="default"
+            size="lg"
             onClick={() => remove(i)}
             title="Remover"
           >
             ×
-          </button>
-        </div>
+          </ActionIcon>
+        </Group>
       ))}
-      <button type="button" className="btn-ghost btn-sm" onClick={add}>
+      <Button variant="default" size="xs" onClick={add} style={{ alignSelf: 'flex-start' }}>
         + palavra
-      </button>
-    </div>
+      </Button>
+    </Stack>
   )
 }
 
@@ -49,6 +67,8 @@ function CategoriesPage() {
   const [editingId, setEditingId] = useState(null)
   const [editingName, setEditingName] = useState('')
   const [editingKeywords, setEditingKeywords] = useState([''])
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
+  const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false)
 
   const apiFetch = useApi()
 
@@ -79,8 +99,15 @@ function CategoriesPage() {
     fetchCategories()
   }
 
-  async function handleDelete(id) {
-    await apiFetch(`/categories/${id}`, { method: 'DELETE' })
+  function openDeleteModal(id) {
+    setDeleteTargetId(id)
+    openDelete()
+  }
+
+  async function handleDelete() {
+    await apiFetch(`/categories/${deleteTargetId}`, { method: 'DELETE' })
+    closeDelete()
+    setDeleteTargetId(null)
     fetchCategories()
   }
 
@@ -109,83 +136,97 @@ function CategoriesPage() {
   }
 
   return (
-    <div className="page">
-      <h2>Categorias</h2>
+    <Container size="md" py="xl">
+      <Title order={2} mb="xl">Categorias</Title>
 
-      <form className="inline-form" onSubmit={handleCreate}>
-        <input
-          type="text"
-          placeholder="Nome"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          style={{ flex: '0 0 180px' }}
-        />
-        <KeywordInputs list={keywords} setList={setKeywords} />
-        <button type="submit" className="btn-primary">
-          Criar
-        </button>
-      </form>
+      <Paper withBorder radius="md" p="md" mb="lg" shadow="xs">
+        <form onSubmit={handleCreate}>
+          <Group align="flex-start" gap="sm">
+            <TextInput
+              placeholder="Nome"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{ flex: '0 0 180px' }}
+            />
+            <KeywordInputs list={keywords} setList={setKeywords} />
+            <Button type="submit">Criar</Button>
+          </Group>
+        </form>
+      </Paper>
 
       {loading ? (
-        <p className="muted">Carregando...</p>
+        <Center py="xl"><Loader /></Center>
       ) : categories.length === 0 ? (
-        <p className="muted">Nenhuma categoria cadastrada.</p>
+        <Text c="dimmed">Nenhuma categoria cadastrada.</Text>
       ) : (
-        <div className="list">
-          {categories.map((cat) => (
-            <div
-              key={cat.category_id}
-              className={`list-item${editingId === cat.category_id ? ' list-item--editing' : ''}`}
-            >
+        <Paper withBorder radius="md" shadow="xs">
+          {categories.map((cat, i) => (
+            <Box key={cat.category_id}>
+              {i > 0 && <Divider />}
               {editingId === cat.category_id ? (
-                <div className="edit-panel">
-                  <input
+                <Stack gap="sm" p="md">
+                  <TextInput
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     placeholder="Nome"
                     autoFocus
                   />
                   <KeywordInputs list={editingKeywords} setList={setEditingKeywords} />
-                  <div className="edit-panel-actions">
-                    <button
-                      className="btn-primary btn-sm"
-                      onClick={() => handleEdit(cat.category_id)}
-                    >
+                  <Group gap="xs">
+                    <Button size="xs" onClick={() => handleEdit(cat.category_id)}>
                       Salvar
-                    </button>
-                    <button className="btn-ghost btn-sm" onClick={() => setEditingId(null)}>
+                    </Button>
+                    <Button size="xs" variant="default" onClick={() => setEditingId(null)}>
                       Cancelar
-                    </button>
-                  </div>
-                </div>
+                    </Button>
+                  </Group>
+                </Stack>
               ) : (
-                <>
-                  <span className="tx-badge" style={categoryColor(cat.category_id)}>
+                <Group p="sm" gap="md" wrap="nowrap">
+                  <Badge variant="light" radius="sm" color={categoryColor(cat.category_id)}>
                     {cat.name}
-                  </span>
-                  <div className="keyword-tags">
+                  </Badge>
+                  <Group gap={6} style={{ flex: 1 }} wrap="wrap">
                     {patternTags(cat.pattern).map((tag) => (
-                      <span key={tag} className="keyword-tag">
+                      <Badge
+                        key={tag}
+                        variant="default"
+                        radius="sm"
+                        style={{ fontFamily: 'monospace', textTransform: 'none' }}
+                      >
                         {tag}
-                      </span>
+                      </Badge>
                     ))}
-                  </div>
-                  <div className="list-item-actions">
-                    <button className="btn-ghost btn-sm" onClick={() => startEditing(cat)}>
+                  </Group>
+                  <Group gap={4}>
+                    <Button size="xs" variant="default" onClick={() => startEditing(cat)}>
                       Editar
-                    </button>
-                    <button className="btn-danger" onClick={() => handleDelete(cat.category_id)}>
+                    </Button>
+                    <Button size="xs" variant="subtle" color="red" onClick={() => openDeleteModal(cat.category_id)}>
                       Deletar
-                    </button>
-                  </div>
-                </>
+                    </Button>
+                  </Group>
+                </Group>
               )}
-            </div>
+            </Box>
           ))}
-        </div>
+        </Paper>
       )}
-    </div>
+      <Modal
+        opened={deleteOpened}
+        onClose={closeDelete}
+        title="Confirmar exclusão"
+        size="sm"
+        centered
+      >
+        <Text size="sm" mb="lg">Tem certeza que deseja excluir esta categoria?</Text>
+        <Group justify="flex-end" gap="xs">
+          <Button variant="default" onClick={closeDelete}>Cancelar</Button>
+          <Button color="red" onClick={handleDelete}>Excluir</Button>
+        </Group>
+      </Modal>
+    </Container>
   )
 }
 

@@ -1,19 +1,28 @@
-const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+import { Select, NumberInput } from '@mantine/core'
+
+const MONTHS = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+]
+
+const MONTH_OPTIONS = MONTHS.map((m, i) => ({ value: String(i + 1), label: m }))
 
 function MonthYearPicker({ month, year, onMonthChange, onYearChange }) {
   return (
     <>
-      <select value={month} onChange={(e) => onMonthChange(e.target.value)}>
-        {MONTHS.map((m, i) => (
-          <option key={i + 1} value={i + 1}>{m}</option>
-        ))}
-      </select>
-      <input
-        type="number"
-        value={year}
-        onChange={(e) => onYearChange(e.target.value)}
-        min="2000"
-        style={{ width: 80 }}
+      <Select
+        value={String(month)}
+        onChange={(value) => onMonthChange(Number(value))}
+        data={MONTH_OPTIONS}
+        allowDeselect={false}
+        w={140}
+      />
+      <NumberInput
+        value={Number(year)}
+        onChange={(value) => onYearChange(value)}
+        min={2000}
+        hideControls
+        w={90}
       />
     </>
   )
