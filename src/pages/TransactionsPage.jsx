@@ -11,7 +11,10 @@ import {
   TextInput,
   NumberInput,
   Select,
+  Input,
   Checkbox,
+  Popover,
+  ComboboxChevron,
   Button,
   FileButton,
   Badge,
@@ -56,18 +59,32 @@ const PAYMENT_OPTIONS = [
   { value: 'account', label: 'Conta' },
 ]
 const FILTER_TYPE_OPTIONS = [
-  { value: '', label: 'Todos' },
+  { value: '', label: 'Todos tipos' },
   { value: 'expense', label: 'Despesas' },
   { value: 'income', label: 'Receitas' },
+]
+const FILTER_STATUS_OPTIONS = [
+  { value: '', label: 'Todos os status' },
+  { value: 'done', label: 'Realizado' },
+  { value: 'provision', label: 'Provisão' },
+]
+const FILTER_PAYMENT_OPTIONS = [
+  { value: '', label: 'Todos os métodos' },
+  { value: 'credit_card', label: 'Cartão de crédito' },
+  { value: 'account', label: 'Conta' },
 ]
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([])
   const [categories, setCategories] = useState({})
+  const [categoriesList, setCategoriesList] = useState([])
   const [loading, setLoading] = useState(true)
   const [month, setMonth] = useState(currentDate.getMonth() + 1)
   const [year, setYear] = useState(currentDate.getFullYear())
   const [type, setType] = useState('')
+  const [status, setStatus] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('')
+  const [categoryIds, setCategoryIds] = useState([])
   const [form, setForm] = useState(emptyForm)
   const [csvFile, setCsvFile] = useState(null)
 
@@ -80,20 +97,27 @@ function TransactionsPage() {
         const map = {}
         data.forEach((cat) => { map[cat.category_id] = cat.name })
         setCategories(map)
+        setCategoriesList(
+          data.map((cat) => ({ value: String(cat.category_id), label: cat.name }))
+        )
       })
   }, [])
 
   useEffect(() => {
     fetchTransactions()
-  }, [month, year, type])
+  }, [month, year, type, status, paymentMethod, categoryIds])
 
   function fetchTransactions() {
     setLoading(true)
     const params = { month, year }
     if (type) params.type = type
+    if (status) params.status = status
+    if (paymentMethod) params.payment_method = paymentMethod
     const query = new URLSearchParams(params).toString()
+    const categoryQuery = categoryIds.map((id) => `category_id=${id}`).join('&')
+    const fullQuery = [query, categoryQuery].filter(Boolean).join('&')
 
-    apiFetch(`/transactions?${query}`)
+    apiFetch(`/transactions?${fullQuery}`)
       .then((res) => res.json())
       .then((data) => {
         setTransactions(data)
@@ -155,26 +179,49 @@ function TransactionsPage() {
     <Container size="md" py="xl">
       <Title order={2} mb="xl">Transações</Title>
 
-      <Group gap="sm" mb="xl" wrap="wrap">
-        <MonthYearPicker month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} />
-        <Select
-          value={type}
-          onChange={(value) => setType(value ?? '')}
-          data={FILTER_TYPE_OPTIONS}
-          allowDeselect={false}
-          w={140}
-        />
-        <Group gap="xs" ml="auto">
-          <FileButton onChange={setCsvFile} accept=".csv">
-            {(props) => (
-              <Button variant="default" {...props}>
-                {csvFile ? csvFile.name : 'CSV'}
-              </Button>
-            )}
-          </FileButton>
-          {csvFile && <Button onClick={handleImport}>Importar</Button>}
+      <Stack gap="xs" mb="xl">
+        <Group gap="sm" wrap="wrap">
+          <MonthYearPicker month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} />
+          <Group gap="xs" ml="auto">
+            <FileButton onChange={setCsvFile} accept=".csv">
+              {(props) => (
+                <Button variant="default" {...props}>
+                  {csvFile ? csvFile.name : 'CSV'}
+                </Button>
+              )}
+            </FileButton>
+            {csvFile && <Button onClick={handleImport}>Importar</Button>}
+          </Group>
         </Group>
-      </Group>
+        <Group gap="sm" wrap="wrap">
+          <Select
+            value={type}
+            onChange={(value) => setType(value ?? '')}
+            data={FILTER_TYPE_OPTIONS}
+            allowDeselect={false}
+            w={160}
+          />
+          <Select
+            value={status}
+            onChange={(value) => setStatus(value ?? '')}
+            data={FILTER_STATUS_OPTIONS}
+            allowDeselect={false}
+            w={160}
+          />
+          <Select
+            value={paymentMethod}
+            onChange={(value) => setPaymentMethod(value ?? '')}
+            data={FILTER_PAYMENT_OPTIONS}
+            allowDeselect={false}
+            w={180}
+          />
+          <CategoryFilter
+            value={categoryIds}
+            onChange={setCategoryIds}
+            data={categoriesList}
+          />
+        </Group>
+      </Stack>
 
       <Paper withBorder radius="md" p="md" mb="lg" shadow="xs">
         <form onSubmit={handleCreate}>
@@ -289,6 +336,45 @@ function SimpleRow({ children }) {
     <Group gap="sm" grow align="flex-start">
       {children}
     </Group>
+  )
+}
+
+function CategoryFilter({ value, onChange, data }) {
+  const [opened, setOpened] = useState(false)
+
+  const label =
+    value.length === 0
+      ? 'Todas as categorias'
+      : value.length === 1
+        ? (data.find((d) => d.value === value[0])?.label ?? 'Todas as categorias')
+        : `${value.length} categorias`
+
+  return (
+    <Popover opened={opened} onChange={setOpened} width="target">
+      <Popover.Target>
+        <Input
+          component="button"
+          type="button"
+          pointer
+          rightSection={<ComboboxChevron />}
+          onClick={() => setOpened((o) => !o)}
+          w={200}
+        >
+          <Text size="sm" c={value.length === 0 ? 'dimmed' : undefined} truncate>
+            {label}
+          </Text>
+        </Input>
+      </Popover.Target>
+      <Popover.Dropdown p="xs">
+        <Checkbox.Group value={value} onChange={onChange}>
+          <Stack gap={6}>
+            {data.map((item) => (
+              <Checkbox key={item.value} value={item.value} label={item.label} size="sm" />
+            ))}
+          </Stack>
+        </Checkbox.Group>
+      </Popover.Dropdown>
+    </Popover>
   )
 }
 
