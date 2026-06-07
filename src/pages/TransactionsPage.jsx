@@ -6,6 +6,8 @@ import {
   Stack,
   Paper,
   Box,
+  Center,
+  Loader,
   TextInput,
   NumberInput,
   Select,
@@ -233,7 +235,7 @@ function TransactionsPage() {
       </Paper>
 
       {loading ? (
-        <Text c="dimmed">Carregando...</Text>
+        <Center py="xl"><Loader /></Center>
       ) : transactions.length === 0 ? (
         <Text c="dimmed">Nenhuma transação encontrada.</Text>
       ) : (

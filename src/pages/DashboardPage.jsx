@@ -8,6 +8,8 @@ import {
   SimpleGrid,
   Card,
   Progress,
+  Center,
+  Loader,
 } from '@mantine/core'
 import MonthYearPicker from '../components/MonthYearPicker'
 import SummaryCard from '../components/SummaryCard'
@@ -50,7 +52,7 @@ function DashboardPage() {
       </Group>
 
       {loading || !report ? (
-        <Text c="dimmed">Carregando...</Text>
+        <Center py="xl"><Loader /></Center>
       ) : (
         <Stack gap="xl">
           <Stack gap="sm">

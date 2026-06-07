@@ -6,6 +6,9 @@ import {
   Stack,
   Paper,
   Box,
+  Center,
+  Loader,
+  Modal,
   TextInput,
   Button,
   ActionIcon,
@@ -13,6 +16,7 @@ import {
   Text,
   Divider,
 } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import { categoryColor } from '../utils/categoryColors'
 import { useApi } from '../hooks/useApi'
 
@@ -63,6 +67,8 @@ function CategoriesPage() {
   const [editingId, setEditingId] = useState(null)
   const [editingName, setEditingName] = useState('')
   const [editingKeywords, setEditingKeywords] = useState([''])
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
+  const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false)
 
   const apiFetch = useApi()
 
@@ -93,8 +99,15 @@ function CategoriesPage() {
     fetchCategories()
   }
 
-  async function handleDelete(id) {
-    await apiFetch(`/categories/${id}`, { method: 'DELETE' })
+  function openDeleteModal(id) {
+    setDeleteTargetId(id)
+    openDelete()
+  }
+
+  async function handleDelete() {
+    await apiFetch(`/categories/${deleteTargetId}`, { method: 'DELETE' })
+    closeDelete()
+    setDeleteTargetId(null)
     fetchCategories()
   }
 
@@ -143,7 +156,7 @@ function CategoriesPage() {
       </Paper>
 
       {loading ? (
-        <Text c="dimmed">Carregando...</Text>
+        <Center py="xl"><Loader /></Center>
       ) : categories.length === 0 ? (
         <Text c="dimmed">Nenhuma categoria cadastrada.</Text>
       ) : (
@@ -190,7 +203,7 @@ function CategoriesPage() {
                     <Button size="xs" variant="default" onClick={() => startEditing(cat)}>
                       Editar
                     </Button>
-                    <Button size="xs" variant="subtle" color="red" onClick={() => handleDelete(cat.category_id)}>
+                    <Button size="xs" variant="subtle" color="red" onClick={() => openDeleteModal(cat.category_id)}>
                       Deletar
                     </Button>
                   </Group>
@@ -200,6 +213,19 @@ function CategoriesPage() {
           ))}
         </Paper>
       )}
+      <Modal
+        opened={deleteOpened}
+        onClose={closeDelete}
+        title="Confirmar exclusão"
+        size="sm"
+        centered
+      >
+        <Text size="sm" mb="lg">Tem certeza que deseja excluir esta categoria?</Text>
+        <Group justify="flex-end" gap="xs">
+          <Button variant="default" onClick={closeDelete}>Cancelar</Button>
+          <Button color="red" onClick={handleDelete}>Excluir</Button>
+        </Group>
+      </Modal>
     </Container>
   )
 }
