@@ -64,11 +64,11 @@ function DashboardPage() {
             <SimpleGrid cols={3}>
               <SummaryCard title="Receitas" value={report.summary.income_total} variant="income" />
               <SummaryCard title="Despesas" value={report.summary.expenses_total} variant="expense" />
-              <SummaryCard title="Diferença" value={report.summary.difference} />
+              <SummaryCard title="Diferença" value={report.summary.difference} variant={parseFloat(report.summary.difference) >= 0 ? 'income' : 'expense'} />
             </SimpleGrid>
             <SimpleGrid cols={2}>
               <SummaryCard title="Cartão de Crédito" value={report.credit_card_total} />
-              <SummaryCard title="Saldo Atual" value={report.current_balance} />
+              <SummaryCard title="Saldo Atual" value={report.current_balance} variant={parseFloat(report.current_balance) >= 0 ? 'income' : 'expense'} />
             </SimpleGrid>
           </Stack>
 
