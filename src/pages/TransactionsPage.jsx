@@ -9,7 +9,6 @@ import {
   Center,
   Loader,
   TextInput,
-  NumberInput,
   Select,
   Input,
   Checkbox,
@@ -27,6 +26,7 @@ import { categoryColor } from '../utils/categoryColors'
 import MonthYearPicker from '../components/MonthYearPicker'
 import { fmt } from '../utils/formatting'
 import { useApi } from '../hooks/useApi'
+import { CurrencyInput } from '../components/CurrencyInput'
 import { useDebouncedValue } from '@mantine/hooks'
 
 const currentDate = new Date()
@@ -55,7 +55,6 @@ const STATUS_OPTIONS = [
   { value: 'provision', label: 'Provisão' },
 ]
 const PAYMENT_OPTIONS = [
-  { value: '', label: 'Sem método' },
   { value: 'credit_card', label: 'Cartão de crédito' },
   { value: 'account', label: 'Conta' },
 ]
@@ -241,13 +240,10 @@ function TransactionsPage() {
                 onChange={(e) => updateForm('description', e.target.value)}
                 required
               />
-              <NumberInput
+              <CurrencyInput
                 placeholder="Valor"
                 value={form.amount}
                 onChange={(value) => updateForm('amount', value)}
-                decimalScale={2}
-                fixedDecimalScale
-                hideControls
                 required
               />
               <DateInput
@@ -271,10 +267,10 @@ function TransactionsPage() {
                 allowDeselect={false}
               />
               <Select
-                value={form.payment_method}
+                placeholder="Sem método"
+                value={form.payment_method || null}
                 onChange={(value) => updateForm('payment_method', value ?? '')}
                 data={PAYMENT_OPTIONS}
-                allowDeselect={false}
               />
             </SimpleRow>
             <Group justify="space-between">
