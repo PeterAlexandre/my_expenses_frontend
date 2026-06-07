@@ -8,12 +8,14 @@ import {
   SimpleGrid,
   Card,
   Progress,
+  Badge,
   Center,
   Loader,
 } from '@mantine/core'
 import MonthYearPicker from '../components/MonthYearPicker'
 import SummaryCard from '../components/SummaryCard'
 import { fmt } from '../utils/formatting'
+import { categoryColor } from '../utils/categoryColors'
 import { useApi } from '../hooks/useApi'
 
 const currentDate = new Date()
@@ -77,22 +79,30 @@ function DashboardPage() {
               </Text>
               <Card withBorder padding="md" radius="md">
                 <Stack gap="xs">
-                  {report.by_category.map((cat) => (
-                    <Group key={cat.name} gap="md" wrap="nowrap">
-                      <Text size="sm" style={{ flex: 1 }}>
-                        {cat.name === 'Uncategorized' ? 'Sem categoria' : cat.name}
-                      </Text>
-                      <Progress
-                        value={cat.percentage}
-                        color="forest"
-                        size="sm"
-                        style={{ flex: 2 }}
-                      />
-                      <Text size="sm" c="dimmed" fw={500} ta="right" miw={90}>
-                        R$ {fmt(cat.total)}
-                      </Text>
-                    </Group>
-                  ))}
+                  {report.by_category.map((cat) => {
+                    const color = cat.category_id != null ? categoryColor(cat.category_id) : 'gray'
+                    return (
+                      <Group key={cat.name} gap="md" wrap="nowrap">
+                        <Badge
+                          variant="light"
+                          radius="sm"
+                          color={color}
+                          style={{ flex: 1, maxWidth: 160 }}
+                        >
+                          {cat.name === 'Uncategorized' ? 'Sem categoria' : cat.name}
+                        </Badge>
+                        <Progress
+                          value={cat.percentage}
+                          color={color}
+                          size="sm"
+                          style={{ flex: 2 }}
+                        />
+                        <Text size="sm" c="dimmed" fw={500} ta="right" miw={90}>
+                          R$ {fmt(cat.total)}
+                        </Text>
+                      </Group>
+                    )
+                  })}
                 </Stack>
               </Card>
             </Stack>
