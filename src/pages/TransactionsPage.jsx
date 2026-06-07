@@ -27,6 +27,7 @@ import { categoryColor } from '../utils/categoryColors'
 import MonthYearPicker from '../components/MonthYearPicker'
 import { fmt } from '../utils/formatting'
 import { useApi } from '../hooks/useApi'
+import { useDebouncedValue } from '@mantine/hooks'
 
 const currentDate = new Date()
 
@@ -85,6 +86,8 @@ function TransactionsPage() {
   const [status, setStatus] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('')
   const [categoryIds, setCategoryIds] = useState([])
+  const [description, setDescription] = useState('')
+  const [debouncedDescription] = useDebouncedValue(description, 500)
   const [form, setForm] = useState(emptyForm)
   const [csvFile, setCsvFile] = useState(null)
 
@@ -105,7 +108,7 @@ function TransactionsPage() {
 
   useEffect(() => {
     fetchTransactions()
-  }, [month, year, type, status, paymentMethod, categoryIds])
+  }, [month, year, type, status, paymentMethod, categoryIds, debouncedDescription])
 
   function fetchTransactions() {
     setLoading(true)
@@ -113,6 +116,7 @@ function TransactionsPage() {
     if (type) params.type = type
     if (status) params.status = status
     if (paymentMethod) params.payment_method = paymentMethod
+    if (debouncedDescription) params.description = debouncedDescription
     const query = new URLSearchParams(params).toString()
     const categoryQuery = categoryIds.map((id) => `category_id=${id}`).join('&')
     const fullQuery = [query, categoryQuery].filter(Boolean).join('&')
@@ -193,33 +197,37 @@ function TransactionsPage() {
             {csvFile && <Button onClick={handleImport}>Importar</Button>}
           </Group>
         </Group>
-        <Group gap="sm" wrap="wrap">
+        <Group gap="sm" grow wrap="nowrap">
+          <TextInput
+            placeholder="Buscar por descrição..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
           <Select
             value={type}
             onChange={(value) => setType(value ?? '')}
             data={FILTER_TYPE_OPTIONS}
             allowDeselect={false}
-            w={160}
           />
           <Select
             value={status}
             onChange={(value) => setStatus(value ?? '')}
             data={FILTER_STATUS_OPTIONS}
             allowDeselect={false}
-            w={160}
           />
           <Select
             value={paymentMethod}
             onChange={(value) => setPaymentMethod(value ?? '')}
             data={FILTER_PAYMENT_OPTIONS}
             allowDeselect={false}
-            w={180}
           />
-          <CategoryFilter
-            value={categoryIds}
-            onChange={setCategoryIds}
-            data={categoriesList}
-          />
+          <Box style={{ flex: 1, minWidth: 0 }}>
+            <CategoryFilter
+              value={categoryIds}
+              onChange={setCategoryIds}
+              data={categoriesList}
+            />
+          </Box>
         </Group>
       </Stack>
 
@@ -358,7 +366,7 @@ function CategoryFilter({ value, onChange, data }) {
           pointer
           rightSection={<ComboboxChevron />}
           onClick={() => setOpened((o) => !o)}
-          w={200}
+          w="100%"
         >
           <Text size="sm" c={value.length === 0 ? 'dimmed' : undefined} truncate>
             {label}
