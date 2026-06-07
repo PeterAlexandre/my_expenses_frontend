@@ -5,6 +5,7 @@ import {
   Group,
   Stack,
   Paper,
+  Box,
   TextInput,
   NumberInput,
   Select,
@@ -15,6 +16,7 @@ import {
   Text,
   Divider,
 } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { DateInput } from '@mantine/dates'
 import { categoryColor } from '../utils/categoryColors'
 import MonthYearPicker from '../components/MonthYearPicker'
@@ -139,7 +141,10 @@ function TransactionsPage() {
     )
 
     const data = await result.json()
-    alert(`Importadas: ${data.imported} | Ignoradas: ${data.skipped}`)
+    notifications.show({
+      message: `Importadas: ${data.imported} | Ignoradas: ${data.skipped}`,
+      color: 'green',
+    })
     setCsvFile(null)
     fetchTransactions()
   }
@@ -178,7 +183,6 @@ function TransactionsPage() {
                 value={form.description}
                 onChange={(e) => updateForm('description', e.target.value)}
                 required
-                style={{ flex: 1 }}
               />
               <NumberInput
                 placeholder="Valor"
@@ -188,14 +192,12 @@ function TransactionsPage() {
                 fixedDecimalScale
                 hideControls
                 required
-                style={{ flex: 1 }}
               />
               <DateInput
                 value={form.transaction_date}
                 onChange={(value) => updateForm('transaction_date', value)}
                 valueFormat="DD/MM/YYYY"
                 required
-                style={{ flex: 1 }}
               />
             </SimpleRow>
             <SimpleRow>
@@ -204,21 +206,18 @@ function TransactionsPage() {
                 onChange={(value) => updateForm('transaction_type', value)}
                 data={TYPE_OPTIONS}
                 allowDeselect={false}
-                style={{ flex: 1 }}
               />
               <Select
                 value={form.status}
                 onChange={(value) => updateForm('status', value)}
                 data={STATUS_OPTIONS}
                 allowDeselect={false}
-                style={{ flex: 1 }}
               />
               <Select
                 value={form.payment_method}
                 onChange={(value) => updateForm('payment_method', value ?? '')}
                 data={PAYMENT_OPTIONS}
                 allowDeselect={false}
-                style={{ flex: 1 }}
               />
             </SimpleRow>
             <Group justify="space-between">
@@ -240,13 +239,13 @@ function TransactionsPage() {
       ) : (
         <Paper withBorder radius="md" shadow="xs">
           {transactions.map((t, i) => (
-            <div key={t.transaction_id}>
+            <Box key={t.transaction_id}>
               {i > 0 && <Divider />}
               <Group p="sm" gap="md" wrap="nowrap">
                 <Text size="xs" c="dimmed" miw={75}>
                   {t.transaction_date}
                 </Text>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm">{t.description}</Text>
                   {(t.payment_method || t.status === 'provision') && (
                     <Text size="xs" c="dimmed">
@@ -255,12 +254,12 @@ function TransactionsPage() {
                       {t.status === 'provision' && ' · provisão'}
                     </Text>
                   )}
-                </div>
+                </Box>
                 {t.category_id && (
                   <Badge
                     variant="light"
                     radius="sm"
-                    style={categoryColor(t.category_id)}
+                    color={categoryColor(t.category_id)}
                   >
                     {categories[t.category_id] ?? '—'}
                   </Badge>
@@ -275,7 +274,7 @@ function TransactionsPage() {
                   {t.transaction_type === 'income' ? '↑' : '↓'} R$ {fmt(t.amount)}
                 </Text>
               </Group>
-            </div>
+            </Box>
           ))}
         </Paper>
       )}

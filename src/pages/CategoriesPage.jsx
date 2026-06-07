@@ -5,6 +5,7 @@ import {
   Group,
   Stack,
   Paper,
+  Box,
   TextInput,
   Button,
   ActionIcon,
@@ -148,7 +149,7 @@ function CategoriesPage() {
       ) : (
         <Paper withBorder radius="md" shadow="xs">
           {categories.map((cat, i) => (
-            <div key={cat.category_id}>
+            <Box key={cat.category_id}>
               {i > 0 && <Divider />}
               {editingId === cat.category_id ? (
                 <Stack gap="sm" p="md">
@@ -170,7 +171,7 @@ function CategoriesPage() {
                 </Stack>
               ) : (
                 <Group p="sm" gap="md" wrap="nowrap">
-                  <Badge variant="light" radius="sm" style={categoryColor(cat.category_id)}>
+                  <Badge variant="light" radius="sm" color={categoryColor(cat.category_id)}>
                     {cat.name}
                   </Badge>
                   <Group gap={6} style={{ flex: 1 }} wrap="wrap">
@@ -195,7 +196,7 @@ function CategoriesPage() {
                   </Group>
                 </Group>
               )}
-            </div>
+            </Box>
           ))}
         </Paper>
       )}

@@ -52,7 +52,7 @@ function NavItem({ to, end, children }) {
           py={6}
           style={{
             display: 'inline-block',
-            borderRadius: 6,
+            borderRadius: 'var(--mantine-radius-sm)',
             background: isActive ? 'var(--mantine-color-forest-0)' : 'transparent',
           }}
         >
