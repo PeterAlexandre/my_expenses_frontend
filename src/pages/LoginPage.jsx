@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
+  Box,
   Center,
   Paper,
   Stack,
@@ -12,8 +13,13 @@ import {
   Text,
   Alert,
 } from '@mantine/core'
+import bg1 from '../assets/background_image1.jpg'
+import bg2 from '../assets/background_image2.jpg'
+
+const backgrounds = [bg1, bg2]
 
 function LoginPage() {
+  const [bg] = useState(() => backgrounds[Math.floor(Math.random() * backgrounds.length)])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -41,7 +47,20 @@ function LoginPage() {
   }
 
   return (
-    <Center mih="calc(100vh - 57px)" p="md">
+    <Box style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <img
+        src={bg}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          filter: 'blur(8px)',
+          transform: 'scale(1.05)',
+        }}
+      />
+      <Center mih="100vh" p="md" style={{ position: 'relative' }}>
       <Paper withBorder shadow="sm" radius="md" p="xl" w="100%" maw={400}>
         <Title order={2} mb="lg">Entrar</Title>
         <form onSubmit={handleSubmit}>
@@ -70,7 +89,8 @@ function LoginPage() {
           </Anchor>
         </Text>
       </Paper>
-    </Center>
+      </Center>
+    </Box>
   )
 }
 
